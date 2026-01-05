@@ -1,6 +1,5 @@
 const publicKey = "4b6575ac2bebc7d2d579a9aedde904c3";
 const privateKey = "48f32d6c87bde6a335345755b60d84a2f137e191";
-const CORS_PROXY = "https://api.allorigins.win/raw?url=";
 
 function normalize(str) {
   return str.toLowerCase().replace(/[^a-z0-9]/gi, "");
@@ -9,7 +8,7 @@ function normalize(str) {
 function getApiUrl(searchTerm = "") {
   const timestamp = new Date().getTime().toString();
   const hash = md5(timestamp + privateKey + publicKey);
-  let url = `${CORS_PROXY}https://gateway.marvel.com/v1/public/characters?ts=${timestamp}&apikey=${publicKey}&hash=${hash}`;
+  let url = `https://gateway.marvel.com/v1/public/characters?ts=${timestamp}&apikey=${publicKey}&hash=${hash}`;
   if (searchTerm) {
     url += `&nameStartsWith=${encodeURIComponent(searchTerm)}`;
   }
@@ -32,19 +31,21 @@ const avengers = [
 async function fetchAvengers() {
   showSpinner();
   const characterListEl = document.querySelector(".character-list");
-  const requests = avengers.map(item => {
+  const requests = avengers.map((item) => {
     if (typeof item === "number") {
       const timestamp = new Date().getTime().toString();
       const hash = md5(timestamp + privateKey + publicKey);
-      const url = `${CORS_PROXY}https://gateway.marvel.com/v1/public/characters/${item}?ts=${timestamp}&apikey=${publicKey}&hash=${hash}`;
-      return fetch(url).then(res => res.json());
+      const url = `https://gateway.marvel.com/v1/public/characters/${item}?ts=${timestamp}&apikey=${publicKey}&hash=${hash}`;
+      return fetch(url).then((res) => res.json());
     } else {
-      return fetch(getApiUrl(item)).then(res => res.json());
+      return fetch(getApiUrl(item)).then((res) => res.json());
     }
   });
   const results = await Promise.all(requests);
   const allAvengers = results
-    .map(data => Array.isArray(data.data.results) ? data.data.results[0] : null)
+    .map((data) =>
+      Array.isArray(data.data.results) ? data.data.results[0] : null
+    )
     .filter(Boolean);
   characterListEl.innerHTML = allAvengers
     .map((character) => characterHTML(character))
